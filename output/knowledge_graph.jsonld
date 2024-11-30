@@ -1,0 +1,296 @@
+[
+  {
+    "@id": "http://example.org/kg/2",
+    "@type": [
+      "http://schema.org/Technology"
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:N91a9e56ed4ec40d784609737fa76a1f1"
+      }
+    ],
+    "http://example.org/kg/is_part_of": [
+      {
+        "@id": "http://example.org/kg/1"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "AI"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "机器学习"
+      }
+    ]
+  },
+  {
+    "@id": "_:N91a9e56ed4ec40d784609737fa76a1f1",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.95
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/3",
+    "@type": [
+      "http://schema.org/Technology"
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:Nf82891a8f8394c73a4a6bfb02f8213dd"
+      }
+    ],
+    "http://example.org/kg/is_part_of": [
+      {
+        "@id": "http://example.org/kg/2"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "ML"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "深度学习"
+      }
+    ],
+    "http://schema.org/temporal": [
+      {
+        "@value": "2012-present"
+      }
+    ]
+  },
+  {
+    "@id": "_:Nf82891a8f8394c73a4a6bfb02f8213dd",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.95
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/6",
+    "@type": [
+      "http://schema.org/Model"
+    ],
+    "http://example.org/kg/aspect": [
+      {
+        "@id": "_:N52690eb21ce84ee1b754fb0d74a802a7"
+      }
+    ],
+    "http://example.org/kg/based_on": [
+      {
+        "@id": "http://example.org/kg/5"
+      }
+    ],
+    "http://example.org/kg/competes_with": [
+      {
+        "@id": "http://example.org/kg/7"
+      }
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:Ne3d3a6bee02b463aa9cfd394f7b051ca"
+      },
+      {
+        "@id": "_:N80b537a555b2438dbf7411e99c7b6dbb"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "NLP"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "BERT"
+      }
+    ],
+    "http://schema.org/temporal": [
+      {
+        "@value": "2018"
+      }
+    ]
+  },
+  {
+    "@id": "_:Ne3d3a6bee02b463aa9cfd394f7b051ca",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.95
+      }
+    ]
+  },
+  {
+    "@id": "_:N80b537a555b2438dbf7411e99c7b6dbb",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.7
+      }
+    ]
+  },
+  {
+    "@id": "_:N52690eb21ce84ee1b754fb0d74a802a7",
+    "http://schema.org/value": [
+      {
+        "@value": "architecture"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/4",
+    "@type": [
+      "http://schema.org/Algorithm"
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:N77c1d6aa35bd47fa9fcbcf5e2f39a760"
+      }
+    ],
+    "http://example.org/kg/is_type_of": [
+      {
+        "@id": "http://example.org/kg/3"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "DL"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "卷积神经网络"
+      }
+    ],
+    "http://schema.org/temporal": [
+      {
+        "@value": "2012"
+      }
+    ]
+  },
+  {
+    "@id": "_:N77c1d6aa35bd47fa9fcbcf5e2f39a760",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.9
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/7",
+    "@type": [
+      "http://schema.org/Model"
+    ],
+    "http://example.org/kg/based_on": [
+      {
+        "@id": "http://example.org/kg/5"
+      }
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:Nb6ace376764c4e7fb3aae56695cad784"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "NLP"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "GPT"
+      }
+    ],
+    "http://schema.org/temporal": [
+      {
+        "@value": "2018-present"
+      }
+    ]
+  },
+  {
+    "@id": "_:Nb6ace376764c4e7fb3aae56695cad784",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.95
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/1",
+    "@type": [
+      "http://schema.org/Technology"
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "Computer Science"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "人工智能"
+      }
+    ]
+  },
+  {
+    "@id": "http://example.org/kg/5",
+    "@type": [
+      "http://schema.org/Architecture"
+    ],
+    "http://example.org/kg/hasConfidence": [
+      {
+        "@id": "_:Nc47d146b55c14a0ca0d7cb2f87dd1581"
+      }
+    ],
+    "http://example.org/kg/revolutionized": [
+      {
+        "@id": "http://example.org/kg/3"
+      }
+    ],
+    "http://example.org/kg/year": [
+      {
+        "@id": "_:Nb5a8bc2d18984cdd918b0e4c9eba0083"
+      }
+    ],
+    "http://schema.org/field": [
+      {
+        "@value": "DL"
+      }
+    ],
+    "http://schema.org/name": [
+      {
+        "@value": "Transformer"
+      }
+    ],
+    "http://schema.org/temporal": [
+      {
+        "@value": "2017"
+      }
+    ]
+  },
+  {
+    "@id": "_:Nc47d146b55c14a0ca0d7cb2f87dd1581",
+    "http://schema.org/value": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#double",
+        "@value": 0.85
+      }
+    ]
+  },
+  {
+    "@id": "_:Nb5a8bc2d18984cdd918b0e4c9eba0083",
+    "http://schema.org/value": [
+      {
+        "@value": "2017"
+      }
+    ]
+  }
+]

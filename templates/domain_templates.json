@@ -1,0 +1,92 @@
+{
+  "tech-stack": {
+    "id": "tech-stack",
+    "name": "技术栈关系",
+    "description": "提取技术组件之间的依赖、使用和兼容性关系",
+    "template": "分析以下技术文本，重点关注：\n1. 技术组件之间的依赖关系\n2. 软件版本兼容性\n3. 系统架构层次\n4. 接口调用关系\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 版本兼容性要求\n- 部署依赖关系\n- 技术栈分层\n- API调用流程",
+    "relation_types": ["uses", "depends_on", "compatible_with", "part_of"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "business-org": {
+    "id": "business-org",
+    "name": "企业组织关系",
+    "description": "提取企业组织架构、业务流程和职责关系",
+    "template": "分析以下企业相关文本，重点关注：\n1. 组织架构关系\n2. 业务流程依赖\n3. 职责划分\n4. 汇报关系\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 部门层级关系\n- 岗位职责关系\n- 业务流程依赖\n- 跨部门协作",
+    "relation_types": ["belongs_to", "reports_to", "collaborates_with", "responsible_for"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "academic-research": {
+    "id": "academic-research",
+    "name": "学术研究关系",
+    "description": "提取学术论文中的研究方法、引用和结论关系",
+    "template": "分析以下学术文本，重点关注：\n1. 研究方法论\n2. 实验结果关系\n3. 引用关系\n4. 理论推导\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 因果关系\n- 实验验证\n- 理论基础\n- 研究贡献",
+    "relation_types": ["cites", "proves", "based_on", "contributes_to"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "medical-diagnosis": {
+    "id": "medical-diagnosis",
+    "name": "医疗诊断关系",
+    "description": "提取医疗诊断、治疗和病因关系",
+    "template": "分析以下医疗文本，重点关注：\n1. 症状与疾病关系\n2. 治疗方案依赖\n3. 药物相互作用\n4. 病因追踪\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 症状指征\n- 治疗方案\n- 药物反应\n- 预防措施",
+    "relation_types": ["causes", "treats", "indicates", "interacts_with"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "legal-case": {
+    "id": "legal-case",
+    "name": "法律案例关系",
+    "description": "提取法律案例中的判例、引用和推理关系",
+    "template": "分析以下法律文本，重点关注：\n1. 法律条款适用\n2. 案例引用\n3. 判决推理\n4. 权责关系\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 法律依据\n- 判例引用\n- 责任认定\n- 权利义务",
+    "relation_types": ["applies_to", "references", "results_in", "obligates"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "financial-analysis": {
+    "id": "financial-analysis",
+    "name": "金融分析关系",
+    "description": "提取金融市场、投资和风险关系",
+    "template": "分析以下金融文本，重点关注：\n1. 市场影响因素\n2. 投资关系\n3. 风险依赖\n4. 收益相关性\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 市场关联性\n- 风险传导\n- 投资组合\n- 收益预期",
+    "relation_types": ["affects", "invests_in", "correlates_with", "risks"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "product-development": {
+    "id": "product-development",
+    "name": "产品开发关系",
+    "description": "提取产品设计、功能和用户需求关系",
+    "template": "分析以下产品开发文本，重点关注：\n1. 功能依赖关系\n2. 用户需求映射\n3. 技术实现路径\n4. 产品迭代关系\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 需求优先级\n- 功能依赖\n- 技术约束\n- 用户反馈",
+    "relation_types": ["requires", "implements", "satisfies", "extends"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "environmental-impact": {
+    "id": "environmental-impact",
+    "name": "环境影响关系",
+    "description": "提取环境因素、生态系统和人类活动关系",
+    "template": "分析以下环境相关文本，重点关注：\n1. 生态系统关系\n2. 环境影响链\n3. 人类活动影响\n4. 可持续发展\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 生态链接\n- 环境影响\n- 人类干预\n- 可持续性",
+    "relation_types": ["affects", "depends_on", "sustains", "threatens"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  },
+  "social-network": {
+    "id": "social-network",
+    "name": "社交网络关系",
+    "description": "提取社交网络中的用户关系和互动模式",
+    "template": "分析以下社交网络文本，重点关注：\n1. 用户关系网络\n2. 互动模式\n3. 信息传播\n4. 群体行为\n\n文本内容：\n{text}\n\n需要提取的关系类型：\n{relation_types}\n\n特别注意：\n- 社交关系\n- 互动频率\n- 信息流动\n- 群体影响",
+    "relation_types": ["follows", "interacts_with", "influences", "belongs_to"],
+    "created_at": "2024-01-10T00:00:00",
+    "updated_at": "2024-01-10T00:00:00",
+    "is_active": true
+  }
+}

@@ -1,0 +1,173 @@
+{
+    "app": {
+        "name": "DeepSeek Knowledge Graph Visualization System",
+        "description": "Powerful Knowledge Graph Analysis and Visualization Platform"
+    },
+    "nav": {
+        "home": "Home",
+        "visualization": "Visualization",
+        "analysis": "Analysis",
+        "query": "Query",
+        "settings": "Settings"
+    },
+    "actions": {
+        "search": "Search",
+        "clear": "Clear",
+        "export": "Export",
+        "import": "Import",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "apply": "Apply",
+        "reset": "Reset"
+    },
+    "visualization": {
+        "title": "Knowledge Graph Visualization",
+        "options": {
+            "layout": "Layout",
+            "theme": "Theme",
+            "zoom": "Zoom",
+            "filter": "Filter"
+        },
+        "layouts": {
+            "force": "Force Layout",
+            "circular": "Circular Layout",
+            "hierarchical": "Hierarchical Layout",
+            "grid": "Grid Layout"
+        }
+    },
+    "analysis": {
+        "title": "Graph Analysis",
+        "metrics": {
+            "nodes": "Nodes",
+            "edges": "Edges",
+            "density": "Density",
+            "diameter": "Diameter"
+        },
+        "algorithms": {
+            "centrality": "Centrality Analysis",
+            "community": "Community Detection",
+            "path": "Path Analysis",
+            "similarity": "Similarity Analysis"
+        },
+        "statistics": "Statistics",
+        "centrality": "Centrality Analysis",
+        "community": "Community Detection",
+        "path": "Path Analysis",
+        "basicStats": "Basic Statistics",
+        "degreeStats": "Degree Distribution",
+        "nodes": "Nodes",
+        "edges": "Edges",
+        "averageDegree": "Average Degree",
+        "density": "Density",
+        "clustering": "Clustering Coefficient",
+        "degreeCentrality": "Degree Centrality",
+        "closenessCentrality": "Closeness Centrality",
+        "betweennessCentrality": "Betweenness Centrality",
+        "eigenvectorCentrality": "Eigenvector Centrality",
+        "calculate": "Calculate",
+        "detect": "Detect Communities",
+        "communityCount": "Community Count",
+        "modularity": "Modularity",
+        "averagePath": "Average Path Length",
+        "diameter": "Graph Diameter",
+        "rank": "Rank",
+        "node": "Node",
+        "value": "Value"
+    },
+    "query": {
+        "title": "Knowledge Query",
+        "placeholder": "Enter your query...",
+        "types": {
+            "path": "Path Query",
+            "entity": "Entity Query",
+            "relation": "Relation Query",
+            "pattern": "Pattern Query"
+        },
+        "results": {
+            "title": "Query Results",
+            "empty": "No results found",
+            "loading": "Querying..."
+        },
+        "basic": "Basic Query",
+        "path": "Path Query",
+        "neighbor": "Neighbor Query",
+        "complex": "Complex Query",
+        "basicPlaceholder": "Enter keywords to search...",
+        "startNode": "Start node...",
+        "endNode": "End node...",
+        "centerNode": "Center node...",
+        "complexPlaceholder": "Enter complex query conditions...\nExample: type=Person AND (age>20 OR role=admin)",
+        "filterLabel": "Label",
+        "filterType": "Type",
+        "filterProperty": "Property",
+        "filterIncoming": "Incoming",
+        "filterOutgoing": "Outgoing",
+        "search": "Search",
+        "reset": "Reset",
+        "noResults": "No matching results found",
+        "resultsCount": "Found {count} results"
+    },
+    "settings": {
+        "title": "System Settings",
+        "general": {
+            "title": "General Settings",
+            "language": "Language",
+            "theme": "Theme",
+            "autoSave": "Auto Save"
+        },
+        "visualization": {
+            "title": "Visualization Settings",
+            "defaultLayout": "Default Layout",
+            "nodeSize": "Node Size",
+            "edgeWidth": "Edge Width",
+            "labels": "Show Labels"
+        },
+        "performance": {
+            "title": "Performance Settings",
+            "cacheSize": "Cache Size",
+            "renderLimit": "Render Limit",
+            "animationSpeed": "Animation Speed"
+        }
+    },
+    "messages": {
+        "success": {
+            "save": "Save successful",
+            "import": "Import successful",
+            "export": "Export successful",
+            "update": "Update successful"
+        },
+        "error": {
+            "general": "Operation failed",
+            "network": "Network error",
+            "validation": "Validation failed",
+            "permission": "Permission denied"
+        },
+        "confirm": {
+            "delete": "Confirm delete?",
+            "clear": "Confirm clear?",
+            "exit": "Confirm exit?"
+        }
+    },
+    "tooltips": {
+        "zoomIn": "Zoom In",
+        "zoomOut": "Zoom Out",
+        "fit": "Fit to Screen",
+        "fullscreen": "Fullscreen",
+        "export": "Export Data",
+        "help": "Help"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "warning": "Warning",
+        "info": "Info",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "more": "More"
+    }
+}

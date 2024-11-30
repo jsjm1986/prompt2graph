@@ -1,0 +1,8 @@
+source_id,target_id,type,confidence
+2,1,is_part_of,0.95
+3,2,is_part_of,0.95
+4,3,is_type_of,0.9
+5,3,revolutionized,0.85,2017
+6,5,based_on,0.95
+7,5,based_on,0.95
+6,7,competes_with,0.7,architecture

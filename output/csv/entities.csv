@@ -1,0 +1,8 @@
+id,name,type,property_field
+2,机器学习,Technology,AI
+1,人工智能,Technology,Computer Science
+3,深度学习,Technology,ML,2012-present
+4,卷积神经网络,Algorithm,DL,2012
+5,Transformer,Architecture,DL,2017
+6,BERT,Model,NLP,2018
+7,GPT,Model,NLP,2018-present

@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% block title %}创建图谱{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title mb-4">
+                    <i class="fas fa-plus-circle text-primary me-2"></i>创建新图谱
+                </h4>
+                <form id="createGraphForm">
+                    <div class="mb-3">
+                        <label for="graphName" class="form-label">图谱名称</label>
+                        <input type="text" class="form-control" id="graphName" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="domain" class="form-label">领域选择</label>
+                        <select class="form-select" id="domain" name="domain" required>
+                            <option value="">请选择领域...</option>
+                            <option value="tech">技术栈</option>
+                            <option value="business">商业组织</option>
+                            <option value="academic">学术研究</option>
+                            <option value="medical">医疗诊断</option>
+                            <option value="legal">法律案例</option>
+                            <option value="finance">金融分析</option>
+                            <option value="product">产品开发</option>
+                            <option value="environment">环境影响</option>
+                            <option value="social">社交网络</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="textInput" class="form-label">输入文本</label>
+                        <textarea class="form-control" id="textInput" name="text" rows="10" required></textarea>
+                        <div class="form-text">输入要分析的文本内容，支持多段落。</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">高级选项</label>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="enableTemporal" name="enableTemporal">
+                                            <label class="form-check-label" for="enableTemporal">
+                                                启用时序推理
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="enableProbabilistic" name="enableProbabilistic">
+                                            <label class="form-check-label" for="enableProbabilistic">
+                                                启用概率推理
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="enableMultiHop" name="enableMultiHop">
+                                            <label class="form-check-label" for="enableMultiHop">
+                                                启用多跳推理
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="enableBatch" name="enableBatch">
+                                            <label class="form-check-label" for="enableBatch">
+                                                启用批处理
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="confidenceThreshold" class="form-label">
+                                        置信度阈值
+                                        <span class="badge bg-secondary ms-1" id="confidenceValue">0.7</span>
+                                    </label>
+                                    <input type="range" class="form-range" id="confidenceThreshold" 
+                                           name="confidenceThreshold" min="0" max="1" step="0.1" value="0.7">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" onclick="previewGraph()">
+                            <i class="fas fa-eye me-1"></i>预览
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>生成图谱
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-primary me-2"></i>领域说明
+                </h5>
+                <div id="domainInfo" class="mt-3">
+                    <p class="text-muted">请选择一个领域以查看详细说明...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-lightbulb text-primary me-2"></i>使用建议
+                </h5>
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        输入文本越详细，生成的关系越准确
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        建议开启多跳推理以发现潜在关系
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        调整置信度阈值可控制关系质量
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        大规模文本建议启用批处理
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 预览模态框 -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">图谱预览</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewGraph" style="height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const domainInfo = {
+    tech: {
+        title: "技术栈分析",
+        description: "分析技术组件之间的依赖关系、兼容性和最佳实践。适用于系统架构设计、技术选型等场景。",
+        examples: ["框架依赖关系", "组件交互", "版本兼容性"]
+    },
+    business: {
+        title: "商业组织分析",
+        description: "分析企业间的合作关系、竞争关系和市场定位。适用于市场研究、竞争分析等场景。",
+        examples: ["企业关系", "市场份额", "产业链分析"]
+    },
+    academic: {
+        title: "学术研究分析",
+        description: "分析研究论文之间的引用关系、研究主题演化。适用于文献综述、研究趋势分析等场景。",
+        examples: ["论文引用网络", "研究主题关联", "作者合作关系"]
+    },
+    medical: {
+        title: "医疗诊断分析",
+        description: "分析症状、疾病和治疗方法之间的关系。适用于辅助诊断、治疗方案制定等场景。",
+        examples: ["症状关联", "治疗方案", "药物相互作用"]
+    },
+    legal: {
+        title: "法律案例分析",
+        description: "分析法律案例之间的关联、判例引用关系。适用于案例研究、法律咨询等场景。",
+        examples: ["判例引用", "法条关联", "案例相似性"]
+    },
+    finance: {
+        title: "金融分析",
+        description: "分析金融产品关系、市场走势关联。适用于投资分析、风险评估等场景。",
+        examples: ["产品关联", "市场影响因素", "风险传导"]
+    },
+    product: {
+        title: "产品开发分析",
+        description: "分析产品特性、用户需求和市场反馈之间的关系。适用于产品规划、需求分析等场景。",
+        examples: ["需求关联", "特性依赖", "用户反馈"]
+    },
+    environment: {
+        title: "环境影响分析",
+        description: "分析环境因素之间的相互作用和影响链。适用于环境评估、影响预测等场景。",
+        examples: ["因素关联", "影响链", "风险评估"]
+    },
+    social: {
+        title: "社交网络分析",
+        description: "分析社交网络中的用户关系和信息传播。适用于社群分析、舆情监测等场景。",
+        examples: ["用户关系", "信息传播", "群体特征"]
+    }
+};
+
+// 更新领域信息
+document.getElementById('domain').addEventListener('change', function() {
+    const domain = this.value;
+    const infoDiv = document.getElementById('domainInfo');
+    
+    if (domain && domainInfo[domain]) {
+        const info = domainInfo[domain];
+        infoDiv.innerHTML = `
+            <h6 class="text-primary">${info.title}</h6>
+            <p>${info.description}</p>
+            <div class="mt-3">
+                <small class="text-muted">适用场景：</small>
+                <div class="mt-2">
+                    ${info.examples.map(example => `
+                        <span class="badge bg-light text-dark me-2 mb-2">${example}</span>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } else {
+        infoDiv.innerHTML = '<p class="text-muted">请选择一个领域以查看详细说明...</p>';
+    }
+});
+
+// 更新置信度显示
+document.getElementById('confidenceThreshold').addEventListener('input', function() {
+    document.getElementById('confidenceValue').textContent = this.value;
+});
+
+// 表单提交处理
+document.getElementById('createGraphForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    showLoading();
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/api/create-graph', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            showAlert('success', '图谱创建成功！');
+            window.location.href = `/graph/${result.graphId}`;
+        } else {
+            throw new Error(result.error || '创建图谱失败');
+        }
+    } catch (error) {
+        showAlert('danger', error.message);
+    } finally {
+        hideLoading();
+    }
+});
+
+// 预览功能
+async function previewGraph() {
+    const formData = new FormData(document.getElementById('createGraphForm'));
+    const data = Object.fromEntries(formData.entries());
+    
+    showLoading();
+    try {
+        const response = await fetch('/api/preview-graph', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
+            
+            // 使用vis.js显示预览图谱
+            const container = document.getElementById('previewGraph');
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16
+                },
+                physics: {
+                    stabilization: false
+                }
+            };
+            
+            new vis.Network(container, result.graph, options);
+        } else {
+            throw new Error(result.error || '预览生成失败');
+        }
+    } catch (error) {
+        showAlert('danger', error.message);
+    } finally {
+        hideLoading();
+    }
+}
+</script>
+{% endblock %}

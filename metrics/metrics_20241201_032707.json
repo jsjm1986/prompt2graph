@@ -1,0 +1,26 @@
+{
+  "cpu": [
+    0.0
+  ],
+  "memory": [
+    63.5
+  ],
+  "disk_io": [
+    13145433600
+  ],
+  "processing_time": [
+    0.004230022430419922
+  ],
+  "throughput": [
+    0
+  ],
+  "success_rate": [
+    0
+  ],
+  "cache_hit_rate": [
+    0
+  ],
+  "error_rate": [
+    0
+  ]
+}

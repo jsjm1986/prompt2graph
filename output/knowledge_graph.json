@@ -1,0 +1,125 @@
+{
+  "entities": [
+    {
+      "id": "2",
+      "name": "机器学习",
+      "type": "Technology",
+      "properties": {
+        "field": "AI"
+      }
+    },
+    {
+      "id": "1",
+      "name": "人工智能",
+      "type": "Technology",
+      "properties": {
+        "field": "Computer Science"
+      }
+    },
+    {
+      "id": "3",
+      "name": "深度学习",
+      "type": "Technology",
+      "properties": {
+        "field": "ML",
+        "temporal": "2012-present"
+      }
+    },
+    {
+      "id": "4",
+      "name": "卷积神经网络",
+      "type": "Algorithm",
+      "properties": {
+        "field": "DL",
+        "temporal": "2012"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Transformer",
+      "type": "Architecture",
+      "properties": {
+        "field": "DL",
+        "temporal": "2017"
+      }
+    },
+    {
+      "id": "6",
+      "name": "BERT",
+      "type": "Model",
+      "properties": {
+        "field": "NLP",
+        "temporal": "2018"
+      }
+    },
+    {
+      "id": "7",
+      "name": "GPT",
+      "type": "Model",
+      "properties": {
+        "field": "NLP",
+        "temporal": "2018-present"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "source": "2",
+      "target": "1",
+      "type": "is_part_of",
+      "confidence": 0.95,
+      "properties": {}
+    },
+    {
+      "source": "3",
+      "target": "2",
+      "type": "is_part_of",
+      "confidence": 0.95,
+      "properties": {}
+    },
+    {
+      "source": "4",
+      "target": "3",
+      "type": "is_type_of",
+      "confidence": 0.9,
+      "properties": {}
+    },
+    {
+      "source": "5",
+      "target": "3",
+      "type": "revolutionized",
+      "confidence": 0.85,
+      "properties": {
+        "year": "2017"
+      }
+    },
+    {
+      "source": "6",
+      "target": "5",
+      "type": "based_on",
+      "confidence": 0.95,
+      "properties": {}
+    },
+    {
+      "source": "7",
+      "target": "5",
+      "type": "based_on",
+      "confidence": 0.95,
+      "properties": {}
+    },
+    {
+      "source": "6",
+      "target": "7",
+      "type": "competes_with",
+      "confidence": 0.7,
+      "properties": {
+        "aspect": "architecture"
+      }
+    }
+  ],
+  "metadata": {
+    "exported_at": "2024-12-01T03:42:02.248174",
+    "entity_count": 7,
+    "relation_count": 7
+  }
+}

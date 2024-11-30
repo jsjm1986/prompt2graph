@@ -1,0 +1,53 @@
+@prefix kg: <http://example.org/kg/> .
+@prefix schema1: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+kg:4 a schema1:Algorithm ;
+    kg:hasConfidence [ schema1:value 9e-01 ] ;
+    kg:is_type_of kg:3 ;
+    schema1:field "DL" ;
+    schema1:name "卷积神经网络" ;
+    schema1:temporal "2012" .
+
+kg:6 a schema1:Model ;
+    kg:aspect [ schema1:value "architecture" ] ;
+    kg:based_on kg:5 ;
+    kg:competes_with kg:7 ;
+    kg:hasConfidence [ schema1:value 7e-01 ],
+        [ schema1:value 9.5e-01 ] ;
+    schema1:field "NLP" ;
+    schema1:name "BERT" ;
+    schema1:temporal "2018" .
+
+kg:1 a schema1:Technology ;
+    schema1:field "Computer Science" ;
+    schema1:name "人工智能" .
+
+kg:2 a schema1:Technology ;
+    kg:hasConfidence [ schema1:value 9.5e-01 ] ;
+    kg:is_part_of kg:1 ;
+    schema1:field "AI" ;
+    schema1:name "机器学习" .
+
+kg:7 a schema1:Model ;
+    kg:based_on kg:5 ;
+    kg:hasConfidence [ schema1:value 9.5e-01 ] ;
+    schema1:field "NLP" ;
+    schema1:name "GPT" ;
+    schema1:temporal "2018-present" .
+
+kg:3 a schema1:Technology ;
+    kg:hasConfidence [ schema1:value 9.5e-01 ] ;
+    kg:is_part_of kg:2 ;
+    schema1:field "ML" ;
+    schema1:name "深度学习" ;
+    schema1:temporal "2012-present" .
+
+kg:5 a schema1:Architecture ;
+    kg:hasConfidence [ schema1:value 8.5e-01 ] ;
+    kg:revolutionized kg:3 ;
+    kg:year [ schema1:value "2017" ] ;
+    schema1:field "DL" ;
+    schema1:name "Transformer" ;
+    schema1:temporal "2017" .
+

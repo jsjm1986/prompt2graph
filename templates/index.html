@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-project-diagram text-primary me-2"></i>知识图谱生成器
+                    </h2>
+                    <p class="lead">一个强大的AI驱动的知识图谱生成和分析工具</p>
+                    <hr>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-brain text-primary me-2"></i>智能关系提取</h5>
+                            <p>使用先进的AI技术自动从文本中提取复杂的语义关系</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-sitemap text-success me-2"></i>多领域支持</h5>
+                            <p>支持技术、商业、学术、医疗等多个领域的知识图谱构建</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-network text-info me-2"></i>高级推理能力</h5>
+                            <p>支持时序推理、概率推理和多跳推理等复杂推理规则</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-tachometer-alt text-warning me-2"></i>性能优化</h5>
+                            <p>采用并行处理和智能缓存机制，确保大规模数据处理性能</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('create_graph') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>开始创建图谱
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-line text-primary me-2"></i>系统状态
+                    </h5>
+                    <div class="mt-3">
+                        <p class="mb-2">CPU使用率</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 0%">
+                                0%
+                            </div>
+                        </div>
+                        <p class="mb-2">内存使用率</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 0%">
+                                0%
+                            </div>
+                        </div>
+                        <p class="mb-2">API请求数</p>
+                        <h3 class="text-primary">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-tasks text-primary me-2"></i>快速操作
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt me-2"></i>管理模板
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar me-2"></i>性能监控
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-book me-2"></i>查看文档
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cog me-2"></i>系统设置
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-history text-primary me-2"></i>最近的图谱
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>领域</th>
+                                    <th>节点数</th>
+                                    <th>关系数</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- recent graphs will be displayed here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateSystemStatus() {
+        fetch('/api/system/status')
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.progress-bar').style.width = data.cpu + '%';
+                document.querySelector('.progress-bar').textContent = data.cpu + '%';
+                document.querySelector('.progress-bar.bg-success').style.width = data.memory + '%';
+                document.querySelector('.progress-bar.bg-success').textContent = data.memory + '%';
+                document.querySelector('.text-primary').textContent = data.api_requests;
+            });
+    }
+
+    // 每30秒更新一次系统状态
+    setInterval(updateSystemStatus, 30000);
+    updateSystemStatus();
+</script>
+{% endblock %}

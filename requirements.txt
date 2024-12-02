@@ -23,3 +23,7 @@ black==23.11.0
 pylint==3.0.2
 psutil==5.9.7
 rdflib>=6.0.0
+scikit-learn>=1.0.2
+python-louvain>=0.16
+scipy>=1.7.3
+nltk>=3.6.5

@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
 db = SQLAlchemy()
@@ -9,9 +8,8 @@ class KnowledgeGraph(db.Model):
     """知识图谱模型"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
+    description = db.Column(db.Text, nullable=True)
     domain = db.Column(db.String(50), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -33,7 +31,6 @@ class KnowledgeGraph(db.Model):
             'name': self.name,
             'description': self.description,
             'domain': self.domain,
-            'user_id': self.user_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
             'enable_temporal': self.enable_temporal,
@@ -48,9 +45,8 @@ class KnowledgeGraph(db.Model):
 class Entity(db.Model):
     """实体模型"""
     id = db.Column(db.Integer, primary_key=True)
-    entity_id = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    type = db.Column(db.String(50), nullable=False)
+    type = db.Column(db.String(50))
     properties = db.Column(db.JSON)
     graph_id = db.Column(db.Integer, db.ForeignKey('knowledge_graph.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -59,10 +55,10 @@ class Entity(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'entity_id': self.entity_id,
             'name': self.name,
             'type': self.type,
             'properties': self.properties,
+            'graph_id': self.graph_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
@@ -70,14 +66,17 @@ class Entity(db.Model):
 class Relation(db.Model):
     """关系模型"""
     id = db.Column(db.Integer, primary_key=True)
-    source_id = db.Column(db.String(100), nullable=False)
-    target_id = db.Column(db.String(100), nullable=False)
+    source_id = db.Column(db.Integer, db.ForeignKey('entity.id'), nullable=False)
+    target_id = db.Column(db.Integer, db.ForeignKey('entity.id'), nullable=False)
     relation_type = db.Column(db.String(50), nullable=False)
     properties = db.Column(db.JSON)
     confidence = db.Column(db.Float, default=1.0)
     graph_id = db.Column(db.Integer, db.ForeignKey('knowledge_graph.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    source = db.relationship('Entity', foreign_keys=[source_id], backref='outgoing_relations')
+    target = db.relationship('Entity', foreign_keys=[target_id], backref='incoming_relations')
 
     def to_dict(self):
         return {
@@ -87,46 +86,16 @@ class Relation(db.Model):
             'relation_type': self.relation_type,
             'properties': self.properties,
             'confidence': self.confidence,
+            'graph_id': self.graph_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
-        }
-
-class User(db.Model):
-    """用户模型"""
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    is_active = db.Column(db.Boolean, default=True)
-    
-    # 关系
-    graphs = db.relationship('KnowledgeGraph', backref='user', lazy=True)
-    history = db.relationship('GraphHistory', backref='user', lazy=True)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat(),
-            'is_active': self.is_active
         }
 
 class GraphHistory(db.Model):
     """图谱操作历史"""
     id = db.Column(db.Integer, primary_key=True)
     graph_id = db.Column(db.Integer, db.ForeignKey('knowledge_graph.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    operation = db.Column(db.String(50), nullable=False)  # create, update, delete
+    operation = db.Column(db.String(50), nullable=False)
     details = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -134,7 +103,6 @@ class GraphHistory(db.Model):
         return {
             'id': self.id,
             'graph_id': self.graph_id,
-            'user_id': self.user_id,
             'operation': self.operation,
             'details': self.details,
             'created_at': self.created_at.isoformat()

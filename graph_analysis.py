@@ -198,20 +198,231 @@ class GraphAnalyzer:
                 'node_count': self.metrics.node_count,
                 'edge_count': self.metrics.edge_count,
                 'density': self.metrics.density,
-                'avg_degree': self.metrics.avg_degree
-            },
-            'structure_info': {
+                'avg_degree': self.metrics.avg_degree,
                 'clustering_coefficient': self.metrics.clustering_coefficient,
-                'components_count': self.metrics.components_count,
+                'components_count': self.metrics.components_count
+            },
+            'path_analysis': {
                 'avg_path_length': self.metrics.avg_path_length,
                 'diameter': self.metrics.diameter
             },
-            'top_nodes': [
-                {'id': node_id, 'importance': score}
-                for node_id, score in self.metrics.top_nodes
-            ],
-            'communities': [
-                {'size': len(community), 'nodes': community}
-                for community in self.metrics.communities
-            ]
+            'top_nodes': self.metrics.top_nodes,
+            'community_sizes': [len(comm) for comm in self.metrics.communities]
         }
+
+    def analyze_temporal_patterns(self, time_window: int = 7) -> Dict[str, Any]:
+        """分析时序模式
+        
+        Args:
+            time_window: 时间窗口大小（天）
+            
+        Returns:
+            Dict: 包含时序分析结果
+        """
+        if not self.graph:
+            return {}
+            
+        try:
+            # 获取边的时间戳
+            edge_times = nx.get_edge_attributes(self.graph, 'timestamp')
+            if not edge_times:
+                return {}
+                
+            # 转换时间戳
+            from datetime import datetime, timedelta
+            current_time = datetime.now()
+            window_start = current_time - timedelta(days=time_window)
+            
+            # 统计时间窗口内的活动
+            activity_count = defaultdict(int)
+            relation_count = defaultdict(int)
+            
+            for edge, timestamp in edge_times.items():
+                if isinstance(timestamp, str):
+                    timestamp = datetime.fromisoformat(timestamp)
+                if timestamp >= window_start:
+                    day = timestamp.date()
+                    activity_count[day] += 1
+                    relation_count[self.graph.edges[edge]['type']] += 1
+            
+            return {
+                'daily_activity': dict(activity_count),
+                'relation_distribution': dict(relation_count),
+                'total_activity': sum(activity_count.values())
+            }
+        except Exception as e:
+            logger.error(f"时序分析错误: {str(e)}")
+            return {}
+
+    def detect_anomalies(self) -> List[Dict[str, Any]]:
+        """检测图中的异常模式"""
+        anomalies = []
+        
+        try:
+            # 检测度数异常
+            degrees = dict(self.graph.degree())
+            mean_degree = np.mean(list(degrees.values()))
+            std_degree = np.std(list(degrees.values()))
+            threshold = mean_degree + 2 * std_degree
+            
+            for node, degree in degrees.items():
+                if degree > threshold:
+                    anomalies.append({
+                        'type': 'high_degree',
+                        'node_id': node,
+                        'value': degree,
+                        'threshold': threshold
+                    })
+            
+            # 检测聚类系数异常
+            clustering = nx.clustering(self.graph)
+            mean_clustering = np.mean(list(clustering.values()))
+            std_clustering = np.std(list(clustering.values()))
+            
+            for node, coef in clustering.items():
+                if coef > mean_clustering + 2 * std_clustering:
+                    anomalies.append({
+                        'type': 'high_clustering',
+                        'node_id': node,
+                        'value': coef,
+                        'threshold': mean_clustering + 2 * std_clustering
+                    })
+            
+            # 检测孤立节点
+            for node in self.graph.nodes():
+                if self.graph.degree(node) == 0:
+                    anomalies.append({
+                        'type': 'isolated_node',
+                        'node_id': node
+                    })
+            
+            return anomalies
+        except Exception as e:
+            logger.error(f"异常检测错误: {str(e)}")
+            return []
+
+    def analyze_relation_patterns(self) -> Dict[str, Any]:
+        """分析关系模式"""
+        if not self.graph:
+            return {}
+            
+        try:
+            patterns = {
+                'type_distribution': defaultdict(int),
+                'bidirectional_relations': [],
+                'cycles': [],
+                'hubs': [],
+                'authorities': []
+            }
+            
+            # 统计关系类型分布
+            for _, _, data in self.graph.edges(data=True):
+                patterns['type_distribution'][data.get('type', 'unknown')] += 1
+            
+            # 查找双向关系
+            for u, v in self.graph.edges():
+                if self.graph.has_edge(v, u):
+                    patterns['bidirectional_relations'].append((u, v))
+            
+            # 查找环路
+            try:
+                cycles = list(nx.simple_cycles(self.graph))
+                patterns['cycles'] = [cycle for cycle in cycles if len(cycle) <= 5]
+            except:
+                pass
+            
+            # 识别中心节点
+            in_degrees = self.graph.in_degree()
+            out_degrees = self.graph.out_degree()
+            
+            # 查找枢纽节点（高出度）
+            patterns['hubs'] = sorted(
+                [(node, d) for node, d in out_degrees if d > np.mean(list(dict(out_degrees).values()))],
+                key=lambda x: x[1],
+                reverse=True
+            )[:5]
+            
+            # 查找权威节点（高入度）
+            patterns['authorities'] = sorted(
+                [(node, d) for node, d in in_degrees if d > np.mean(list(dict(in_degrees).values()))],
+                key=lambda x: x[1],
+                reverse=True
+            )[:5]
+            
+            return patterns
+        except Exception as e:
+            logger.error(f"关系模式分析错误: {str(e)}")
+            return {}
+
+    def predict_missing_relations(self, min_confidence: float = 0.5) -> List[Dict[str, Any]]:
+        """预测可能存在的关系"""
+        predictions = []
+        
+        try:
+            # 基于共同邻居的链接预测
+            for u in self.graph.nodes():
+                for v in self.graph.nodes():
+                    if u != v and not self.graph.has_edge(u, v):
+                        # 获取共同邻居
+                        u_neighbors = set(self.graph.neighbors(u))
+                        v_neighbors = set(self.graph.neighbors(v))
+                        common_neighbors = u_neighbors & v_neighbors
+                        
+                        if len(common_neighbors) > 0:
+                            # 计算Jaccard系数
+                            similarity = len(common_neighbors) / len(u_neighbors | v_neighbors)
+                            
+                            if similarity >= min_confidence:
+                                # 推测最可能的关系类型
+                                relation_types = defaultdict(int)
+                                for n in common_neighbors:
+                                    edge_type = self.graph.edges[u, n].get('type', '')
+                                    relation_types[edge_type] += 1
+                                
+                                most_likely_type = max(relation_types.items(), key=lambda x: x[1])[0]
+                                
+                                predictions.append({
+                                    'source': u,
+                                    'target': v,
+                                    'confidence': similarity,
+                                    'predicted_type': most_likely_type,
+                                    'common_neighbors': list(common_neighbors)
+                                })
+            
+            # 按置信度排序
+            predictions.sort(key=lambda x: x['confidence'], reverse=True)
+            return predictions
+        except Exception as e:
+            logger.error(f"关系预测错误: {str(e)}")
+            return []
+
+    def get_node_influence(self, node_id: str) -> Dict[str, float]:
+        """计算节点影响力指标"""
+        if not self.graph or node_id not in self.graph:
+            return {}
+            
+        try:
+            metrics = {}
+            
+            # PageRank分数
+            pagerank = nx.pagerank(self.graph)
+            metrics['pagerank'] = pagerank[node_id]
+            
+            # HITS分数
+            hits = nx.hits(self.graph)
+            metrics['hub_score'] = hits[0][node_id]
+            metrics['authority_score'] = hits[1][node_id]
+            
+            # 介数中心性
+            metrics['betweenness'] = nx.betweenness_centrality(self.graph)[node_id]
+            
+            # 接近中心性
+            metrics['closeness'] = nx.closeness_centrality(self.graph)[node_id]
+            
+            # 特征向量中心性
+            metrics['eigenvector'] = nx.eigenvector_centrality(self.graph)[node_id]
+            
+            return metrics
+        except Exception as e:
+            logger.error(f"节点影响力计算错误: {str(e)}")
+            return {}

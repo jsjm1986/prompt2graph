@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}创建知识图谱{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">
+        <i class="fas fa-plus-circle me-2"></i>创建新的知识图谱
+    </h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.csrf_token }}
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">图谱名称</label>
+                            {{ form.name(class="form-control", placeholder="输入图谱名称") }}
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">描述</label>
+                            {{ form.description(class="form-control", rows="3", placeholder="描述这个知识图谱") }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="domain" class="form-label">领域</label>
+                            {{ form.domain(class="form-control") }}
+                            {% if form.domain.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.domain.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">输入方式</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="input_type" id="text_input" value="text" checked>
+                                <label class="form-check-label" for="text_input">
+                                    文本输入
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="input_type" id="file_input" value="file">
+                                <label class="form-check-label" for="file_input">
+                                    文件上传
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="text_input_section" class="mb-3">
+                            <label for="text_input" class="form-label">文本内容</label>
+                            {{ form.text_input(class="form-control", rows="5", placeholder="输入文本内容，系统将自动提取实体和关系") }}
+                        </div>
+
+                        <div id="file_input_section" class="mb-3" style="display: none;">
+                            <label for="file" class="form-label">上传文件</label>
+                            {{ form.file(class="form-control") }}
+                            <div class="form-text">支持的文件格式：.txt, .doc, .docx, .pdf</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.enable_temporal(class="form-check-input") }}
+                                <label class="form-check-label" for="enable_temporal">
+                                    启用时序关系
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.enable_probabilistic(class="form-check-input") }}
+                                <label class="form-check-label" for="enable_probabilistic">
+                                    启用概率关系
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>创建图谱
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">创建说明</h5>
+                </div>
+                <div class="card-body">
+                    <h6>图谱名称</h6>
+                    <p class="small text-muted">为你的知识图谱起一个描述性的名称，方便后续查找和管理。</p>
+
+                    <h6>领域选择</h6>
+                    <p class="small text-muted">选择合适的领域可以帮助系统更准确地识别实体和关系。</p>
+
+                    <h6>输入方式</h6>
+                    <p class="small text-muted">
+                        - 文本输入：直接输入文本内容<br>
+                        - 文件上传：上传包含文本的文件
+                    </p>
+
+                    <h6>高级功能</h6>
+                    <p class="small text-muted">
+                        - 时序关系：处理带有时间属性的关系<br>
+                        - 概率关系：处理不确定性关系
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 处理输入方式切换
+    document.querySelectorAll('input[name="input_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const textSection = document.getElementById('text_input_section');
+            const fileSection = document.getElementById('file_input_section');
+            
+            if (this.value === 'text') {
+                textSection.style.display = 'block';
+                fileSection.style.display = 'none';
+            } else {
+                textSection.style.display = 'none';
+                fileSection.style.display = 'block';
+            }
+        });
+    });
+
+    // 表单提交前显示加载动画
+    document.querySelector('form').addEventListener('submit', function() {
+        showLoading();
+    });
+</script>
+{% endblock %}

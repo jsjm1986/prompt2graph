@@ -1,27 +1,24 @@
-from flask import Flask
-from flask_login import LoginManager
+from flask import Flask, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
 from config import config
 from models import db
-from auth import auth, login_manager
 import os
 
 def create_app(config_name='development'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    # 初始化扩展
+    # 初始化数据库
     db.init_app(app)
-    login_manager.init_app(app)
-    JWTManager(app)
 
     # 注册蓝图
-    from auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-
     from graph import graph as graph_blueprint
     app.register_blueprint(graph_blueprint, url_prefix='/graph')
+
+    # 根路由
+    @app.route('/')
+    def index():
+        return redirect(url_for('graph.my_graphs'))
 
     # 创建数据库表
     with app.app_context():

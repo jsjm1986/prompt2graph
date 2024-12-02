@@ -1,3 +1,22 @@
+    PRIMARY KEY (id), 
+    FOREIGN KEY(graph_id) REFERENCES knowledge_graph (id)
+)
+
+
+INFO:sqlalchemy.engine.Engine:[no key 0.00015s] ()
+INFO:sqlalchemy.engine.Engine:
+CREATE TABLE graph_history (
+    id INTEGER NOT NULL, 
+    graph_id INTEGER NOT NULL, 
+    operation VARCHAR(50) NOT NULL, 
+    details JSON, 
+    created_at DATETIME, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(graph_id) REFERENCES knowledge_graph (id)
+)
+
+
+INFO:sqlalchemy.engine.Engine:[no key 0.00012s] ()
 import json
 import os
 from typing import Dict, Any, Optional

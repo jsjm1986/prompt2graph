@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}模板管理{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">
+        <i class="fas fa-tasks me-2"></i>模板管理
+    </h2>
+
+    <div class="row">
+        <!-- 模板列表 -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">已保存的模板</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for template in templates %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-1">{{ template.name }}</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editTemplate('{{ template.id }}')">
+                                        <i class="fas fa-edit"></i> 编辑
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate('{{ template.id }}')">
+                                        <i class="fas fa-trash"></i> 删除
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="mb-1">{{ template.description }}</p>
+                            <small class="text-muted">
+                                创建于: {{ template.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </small>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">暂无模板</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 创建/编辑模板表单 -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">创建新模板</h5>
+                </div>
+                <div class="card-body">
+                    <form id="templateForm">
+                        <div class="mb-3">
+                            <label for="templateName" class="form-label">模板名称</label>
+                            <input type="text" class="form-control" id="templateName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="templateDescription" class="form-label">描述</label>
+                            <textarea class="form-control" id="templateDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="templateConfig" class="form-label">配置 (JSON)</label>
+                            <textarea class="form-control" id="templateConfig" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>保存模板
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 编辑模板
+    function editTemplate(templateId) {
+        fetch(`/graph/templates/${templateId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('templateName').value = data.name;
+                document.getElementById('templateDescription').value = data.description;
+                document.getElementById('templateConfig').value = JSON.stringify(data.config, null, 2);
+            });
+    }
+
+    // 删除模板
+    function deleteTemplate(templateId) {
+        if (confirm('确定要删除这个模板吗？')) {
+            fetch(`/graph/templates/${templateId}`, {
+                method: 'DELETE'
+            }).then(() => {
+                location.reload();
+            });
+        }
+    }
+
+    // 提交表单
+    document.getElementById('templateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('templateName').value,
+            description: document.getElementById('templateDescription').value,
+            config: JSON.parse(document.getElementById('templateConfig').value)
+        };
+
+        fetch('/graph/templates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        }).then(() => {
+            location.reload();
+        });
+    });
+</script>
+{% endblock %}

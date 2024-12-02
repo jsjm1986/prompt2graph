@@ -1,0 +1,58 @@
+{
+  "template": {
+    "entity_types": [
+      {
+        "name": "概念",
+        "properties": {
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "string",
+            "required": false
+          }
+        }
+      }
+    ],
+    "relation_types": [
+      {
+        "name": "关联",
+        "source_types": [
+          "概念"
+        ],
+        "target_types": [
+          "概念"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "required": true
+          },
+          "weight": {
+            "type": "float",
+            "required": false
+          }
+        }
+      }
+    ],
+    "properties_schema": {
+      "string": {
+        "type": "string"
+      },
+      "integer": {
+        "type": "integer"
+      },
+      "float": {
+        "type": "float"
+      },
+      "date": {
+        "type": "date"
+      },
+      "boolean": {
+        "type": "boolean"
+      }
+    }
+  },
+  "timestamp": "2024-12-02T17:38:13.281297"
+}

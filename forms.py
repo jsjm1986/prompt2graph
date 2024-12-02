@@ -1,31 +1,12 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
-    StringField, PasswordField, BooleanField, TextAreaField, 
-    SelectField, FloatField, SubmitField
+    StringField, TextAreaField, SelectField, FloatField, 
+    SubmitField, BooleanField
 )
 from wtforms.validators import (
-    DataRequired, Email, Length, EqualTo, 
-    NumberRange, Optional
+    DataRequired, Length, NumberRange, Optional
 )
-
-class LoginForm(FlaskForm):
-    """登录表单"""
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('密码', validators=[DataRequired()])
-    remember = BooleanField('记住我')
-    submit = SubmitField('登录')
-
-class RegisterForm(FlaskForm):
-    """注册表单"""
-    username = StringField('用户名', validators=[DataRequired(), Length(min=4, max=80)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('密码', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField(
-        '确认密码', 
-        validators=[DataRequired(), EqualTo('password', message='两次输入的密码不一致')]
-    )
-    submit = SubmitField('注册')
 
 class GraphForm(FlaskForm):
     """图谱创建表单"""
@@ -51,15 +32,13 @@ class GraphForm(FlaskForm):
     text_input = TextAreaField('文本输入')
     
     # 高级选项
-    enable_temporal = BooleanField('启用时序推理')
-    enable_probabilistic = BooleanField('启用概率推理')
+    enable_temporal = BooleanField('启用时序关系')
+    enable_probabilistic = BooleanField('启用概率关系')
     enable_multi_hop = BooleanField('启用多跳推理')
-    enable_batch = BooleanField('启用批处理')
     confidence_threshold = FloatField('置信度阈值', 
-        validators=[NumberRange(min=0, max=1)],
+        validators=[Optional(), NumberRange(min=0, max=1)],
         default=0.7
     )
-    
     submit = SubmitField('创建图谱')
 
 class EntityForm(FlaskForm):

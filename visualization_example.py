@@ -96,10 +96,9 @@ def main():
     visualizer.visualize_domain(
         relations,
         output_file=output_file,
-        include_legend=True,
-        include_filters=True,
-        include_search=True,
-        include_export=True
+        include_stats=True,
+        show_clusters=True,
+        show_timeline=True
     )
 
 if __name__ == '__main__':

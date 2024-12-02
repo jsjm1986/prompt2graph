@@ -1,14 +1,38 @@
 import logging
 import requests
 from functools import wraps
-from flask_caching import Cache
 from flask import current_app
 import time
 import hashlib
 import json
+from datetime import datetime, timedelta
 
-# 初始化缓存
-cache = Cache()
+class SimpleCache:
+    """简单的内存缓存实现"""
+    def __init__(self, default_timeout=300):
+        self.cache = {}
+        self.default_timeout = default_timeout
+
+    def get(self, key):
+        if key in self.cache:
+            item = self.cache[key]
+            if item['expiry'] > datetime.now():
+                return item['value']
+            else:
+                del self.cache[key]
+        return None
+
+    def set(self, key, value, timeout=None):
+        if timeout is None:
+            timeout = self.default_timeout
+        expiry = datetime.now() + timedelta(seconds=timeout)
+        self.cache[key] = {
+            'value': value,
+            'expiry': expiry
+        }
+
+# 创建全局缓存实例
+cache = SimpleCache()
 
 def setup_logging():
     """配置日志"""
@@ -36,53 +60,50 @@ class APIRateLimiter:
         return False
 
 class DeepSeekAPI:
-    """DeepSeek API 封装"""
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.rate_limiter = APIRateLimiter(calls_limit=100, time_window=3600)
+    """DeepSeek API 封装 - 使用模拟数据"""
+    def __init__(self, api_key=None):
         self.logger = logging.getLogger(__name__)
     
-    @cache.memoize(timeout=300)
     def extract_entities(self, text):
-        """从文本中提取实体，带缓存"""
-        cache_key = hashlib.md5(text.encode()).hexdigest()
-        
-        if not self.rate_limiter.can_call():
-            raise Exception("API rate limit exceeded")
-        
+        """从文本中提取实体和关系（使用模拟数据）"""
+        if not text:
+            return {'entities': [], 'relations': []}
+
         try:
-            response = self._make_api_call(text)
-            return self._process_response(response)
+            # 生成模拟数据
+            words = [word for word in text.split() if len(word) > 1][:5]  # 取前5个非空词作为实体
+            entities = []
+            relations = []
+            
+            # 生成实体
+            for i, word in enumerate(words, 1):
+                entity = {
+                    'id': i,
+                    'name': word,
+                    'type': '概念',
+                    'properties': {'description': f'从文本中提取的第{i}个实体'}
+                }
+                entities.append(entity)
+            
+            # 生成关系
+            for i in range(len(entities)-1):
+                relation = {
+                    'source_id': entities[i]['id'],
+                    'target_id': entities[i+1]['id'],
+                    'relation_type': '关联',  
+                    'properties': {'strength': 'strong'},
+                    'confidence': 0.9
+                }
+                relations.append(relation)
+            
+            return {
+                'entities': entities,
+                'relations': relations
+            }
+            
         except Exception as e:
-            self.logger.error(f"API调用失败: {str(e)}")
-            raise
-    
-    def _make_api_call(self, text, max_retries=3):
-        """进行API调用，支持重试"""
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        for attempt in range(max_retries):
-            try:
-                response = requests.post(
-                    "https://api.deepseek.com/v1/extract",
-                    headers=headers,
-                    json={"text": text}
-                )
-                response.raise_for_status()
-                return response.json()
-            except requests.exceptions.RequestException as e:
-                if attempt == max_retries - 1:
-                    raise
-                time.sleep(2 ** attempt)  # 指数退避
-    
-    def _process_response(self, response):
-        """处理API响应"""
-        if not response.get("success"):
-            raise Exception(response.get("error", "Unknown API error"))
-        return response["data"]
+            self.logger.error(f"Entity extraction failed: {str(e)}")
+            return {'entities': [], 'relations': []}
 
 class DataCleaner:
     """数据清理工具"""

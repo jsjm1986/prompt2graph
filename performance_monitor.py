@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import time
 import psutil
 import threading
@@ -10,6 +10,7 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}我的知识图谱{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .graph-card {
+        transition: transform 0.2s;
+    }
+    .graph-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-badge {
+        margin-right: 5px;
+    }
+    .graph-actions {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .graph-card:hover .graph-actions {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>我的知识图谱</h2>
+        <a href="{{ url_for('graph.create_graph') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 创建新图谱
+        </a>
+    </div>
+
+    {% if graphs %}
+    <div class="row">
+        {% for graph in graphs %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card graph-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ graph.name }}</h5>
+                    <p class="card-text text-muted">{{ graph.description }}</p>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary stats-badge">{{ graph.domain }}</span>
+                        {% if graph.enable_temporal %}
+                        <span class="badge bg-success stats-badge">时序支持</span>
+                        {% endif %}
+                        {% if graph.enable_probabilistic %}
+                        <span class="badge bg-info stats-badge">概率支持</span>
+                        {% endif %}
+                        {% if graph.enable_multi_hop %}
+                        <span class="badge bg-warning stats-badge">多跳查询</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="graph-actions">
+                        <a href="{{ url_for('graph.view', graph_id=graph.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-eye"></i> 查看
+                        </a>
+                        <a href="{{ url_for('graph.edit', graph_id=graph.id) }}" class="btn btn-sm btn-outline-secondary me-2">
+                            <i class="fas fa-edit"></i> 编辑
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGraph({{ graph.id }})">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>创建于: {{ graph.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-project-diagram fa-4x text-muted mb-3"></i>
+        <h4>还没有创建任何知识图谱</h4>
+        <p class="text-muted">点击上方的"创建新图谱"按钮开始创建吧！</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+function deleteGraph(graphId) {
+    if (confirm('确定要删除这个知识图谱吗？此操作不可恢复。')) {
+        fetch(`/graph/${graphId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('删除失败，请重试');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败，请重试');
+        });
+    }
+}
+</script>
+{% endblock %}

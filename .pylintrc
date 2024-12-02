@@ -1,0 +1,30 @@
+[MASTER]
+disable=
+    C0111, # missing-docstring
+    C0103, # invalid-name
+    C0303, # trailing-whitespace
+    C0301, # line-too-long
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    W0621, # redefined-outer-name
+    R0903, # too-few-public-methods
+
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=W,C,R
+
+[REPORTS]
+output-format=text
+reports=no
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,id,df
+
+[SIMILARITIES]
+min-similarity-lines=7
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=yes

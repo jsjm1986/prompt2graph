@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}查看知识图谱 - {{ graph.name }}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    #graph-container {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ddd;
+        background-color: #f8f9fa;
+    }
+    .graph-info {
+        margin-bottom: 20px;
+    }
+    .entity-list, .relation-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .badge {
+        margin-right: 5px;
+    }
+    .btn-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .list-group-item {
+        transition: background-color 0.2s;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>{{ graph.name }}</h2>
+            <p class="text-muted">{{ graph.description }}</p>
+            
+            <div class="btn-group mb-3">
+                <button class="btn btn-outline-primary" onclick="togglePhysics()">
+                    <i class="fas fa-atom"></i> 切换物理引擎
+                </button>
+                <button class="btn btn-outline-primary" onclick="network.fit()">
+                    <i class="fas fa-compress-arrows-alt"></i> 适应屏幕
+                </button>
+                <a href="{{ url_for('graph.edit', graph_id=graph.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-edit"></i> 编辑图谱
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 图谱可视化 -->
+        <div class="col-8">
+            <div class="card">
+                <div class="card-body">
+                    <div id="graph-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实体和关系列表 -->
+        <div class="col-4">
+            <!-- 实体列表 -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-cube"></i> 实体列表 ({{ entities|length }})
+                </div>
+                <div class="card-body entity-list">
+                    <ul class="list-group list-group-flush">
+                    {% for entity in entities %}
+                        <li class="list-group-item">
+                            <strong>{{ entity.name }}</strong>
+                            <span class="badge bg-secondary">{{ entity.type }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 关系列表 -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-link"></i> 关系列表 ({{ relations|length }})
+                </div>
+                <div class="card-body relation-list">
+                    <ul class="list-group list-group-flush">
+                    {% for relation in relations %}
+                        <li class="list-group-item">
+                            <small class="text-muted">{{ relation.source.name }}</small>
+                            <strong class="mx-2">{{ relation.relation_type }}</strong>
+                            <small class="text-muted">{{ relation.target.name }}</small>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 节点信息模态框 -->
+<div class="modal fade" id="nodeInfoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> 节点信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="nodeInfo"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取图数据
+    const graphData = {{ graph_data|safe }};
+    
+    // 配置选项
+    const options = {
+        nodes: {
+            shape: 'dot',
+            size: 30,
+            font: {
+                size: 14,
+                color: '#343a40'
+            },
+            borderWidth: 2,
+            shadow: true
+        },
+        edges: {
+            width: 2,
+            shadow: true,
+            color: {
+                color: '#666',
+                highlight: '#000',
+                hover: '#333'
+            },
+            font: {
+                size: 12,
+                color: '#343a40',
+                strokeWidth: 0,
+                background: 'rgba(255, 255, 255, 0.8)'
+            },
+            smooth: {
+                type: 'continuous'
+            }
+        },
+        physics: {
+            enabled: true,
+            barnesHut: {
+                gravitationalConstant: -2000,
+                centralGravity: 0.3,
+                springLength: 95,
+                springConstant: 0.04,
+                damping: 0.09
+            }
+        },
+        groups: {
+            // 基础类型
+            '概念': { color: { background: '#FFEEAD', border: '#FFD700' } },
+            '人物': { color: { background: '#FF6B6B', border: '#FF0000' } },
+            '组织': { color: { background: '#4ECDC4', border: '#008B8B' } },
+            '地点': { color: { background: '#45B7D1', border: '#0000CD' } },
+            '事件': { color: { background: '#96CEB4', border: '#2E8B57' } },
+            '技术': { color: { background: '#4A90E2', border: '#0000FF' } },
+            '产品': { color: { background: '#D4A5A5', border: '#8B0000' } },
+            
+            // 扩展类型
+            'Person': { color: { background: '#FF6B6B', border: '#FF0000' } },
+            'Organization': { color: { background: '#4ECDC4', border: '#008B8B' } },
+            'Location': { color: { background: '#45B7D1', border: '#0000CD' } },
+            'Event': { color: { background: '#96CEB4', border: '#2E8B57' } },
+            'Technology': { color: { background: '#4A90E2', border: '#0000FF' } },
+            'Product': { color: { background: '#D4A5A5', border: '#8B0000' } },
+            'Concept': { color: { background: '#FFEEAD', border: '#FFD700' } },
+            'Time': { color: { background: '#DDA0DD', border: '#8B008B' } },
+            'Other': { color: { background: '#E8E8E8', border: '#A9A9A9' } }
+        },
+        interaction: {
+            hover: true,
+            tooltipDelay: 200,
+            zoomView: true,
+            dragView: true
+        }
+    };
+
+    // 创建网络
+    const container = document.getElementById('graph-container');
+    window.network = new vis.Network(container, graphData, options);
+
+    // 节点点击事件
+    network.on('click', function(params) {
+        if (params.nodes.length > 0) {
+            const nodeId = params.nodes[0];
+            const node = graphData.nodes.find(n => n.id === nodeId);
+            if (node) {
+                showNodeInfo(node);
+            }
+        }
+    });
+
+    // 切换物理引擎状态
+    window.togglePhysics = function() {
+        const physics = network.physics.options.enabled;
+        network.setOptions({ physics: { enabled: !physics } });
+    };
+
+    // 显示节点信息
+    window.showNodeInfo = function(node) {
+        const modal = new bootstrap.Modal(document.getElementById('nodeInfoModal'));
+        const nodeInfo = document.getElementById('nodeInfo');
+        
+        let propertiesHtml = '';
+        if (node.properties) {
+            for (const [key, value] of Object.entries(node.properties)) {
+                propertiesHtml += `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>`;
+            }
+        }
+        
+        nodeInfo.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="30%">名称</th>
+                        <td>${node.label}</td>
+                    </tr>
+                    <tr>
+                        <th>类型</th>
+                        <td><span class="badge bg-secondary">${node.group}</span></td>
+                    </tr>
+                    ${propertiesHtml ? `
+                    <tr>
+                        <th>属性</th>
+                        <td>
+                            <table class="table table-sm table-striped mb-0">
+                                <tbody>${propertiesHtml}</tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    ` : ''}
+                </table>
+            </div>
+        `;
+        modal.show();
+    };
+
+    // 初始化工具提示
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+});
+</script>
+{% endblock %}

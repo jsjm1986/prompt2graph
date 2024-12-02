@@ -1,9 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify, current_app, send_file
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, request, jsonify, current_app, send_file, redirect, url_for
 from models import db, KnowledgeGraph, Entity, Relation, GraphHistory
 from forms import GraphForm, EntityForm, RelationForm
 from knowledge_graph import KnowledgeGraphBuilder
-from graph_visualization import GraphVisualizer, DomainSpecificVisualizer
+from graph_visualization import GraphVisualizer
 from utils import DeepSeekAPI, DataCleaner, FileHandler
 import json
 import os
@@ -12,81 +11,141 @@ from datetime import datetime
 graph = Blueprint('graph', __name__)
 
 @graph.route('/my_graphs')
-@login_required
 def my_graphs():
-    """显示用户的所有知识图谱"""
-    graphs = KnowledgeGraph.query.filter_by(user_id=current_user.id).all()
+    """显示所有知识图谱"""
+    graphs = KnowledgeGraph.query.all()
     return render_template('graph/my_graphs.html', graphs=graphs)
 
+@graph.route('/templates')
+def manage_templates():
+    """管理图谱模板"""
+    return render_template('graph/templates.html')
+
 @graph.route('/create', methods=['GET', 'POST'])
-@login_required
-def create():
+def create_graph():
     """创建新的知识图谱"""
     form = GraphForm()
     if form.validate_on_submit():
-        # 创建新的知识图谱
-        graph = KnowledgeGraph(
-            name=form.name.data,
-            description=form.description.data
-        )
-        db.session.add(graph)
-        db.session.commit()
-
-        # 处理输入数据
-        if form.file.data:
-            file_handler = FileHandler(current_app.config['ALLOWED_EXTENSIONS'])
-            text = file_handler.extract_text(form.file.data)
-        else:
-            text = form.text_input.data
-
-        # 使用DeepSeek API提取实体和关系
-        api = DeepSeekAPI(current_app.config['DEEPSEEK_API_KEY'])
-        extracted_data = api.extract_entities(text)
-
-        # 添加实体和关系到数据库
-        for entity_data in extracted_data['entities']:
-            entity = Entity(
-                entity_id=entity_data['id'],
-                name=entity_data['name'],
-                type=entity_data['type'],
-                graph_id=graph.id
+        try:
+            # 创建新的知识图谱
+            graph = KnowledgeGraph(
+                name=form.name.data,
+                description=form.description.data,
+                domain=form.domain.data,
+                enable_temporal=form.enable_temporal.data,
+                enable_probabilistic=form.enable_probabilistic.data,
+                enable_multi_hop=form.enable_multi_hop.data,
+                confidence_threshold=form.confidence_threshold.data
             )
-            db.session.add(entity)
+            db.session.add(graph)
+            db.session.commit()
 
-        for relation_data in extracted_data['relations']:
-            relation = Relation(
-                source_id=relation_data['source'],
-                target_id=relation_data['target'],
-                relation_type=relation_data['relation'],
-                graph_id=graph.id
-            )
-            db.session.add(relation)
+            # 处理输入数据
+            text = None
+            if form.file.data:
+                file_handler = FileHandler(current_app.config.get('ALLOWED_EXTENSIONS', {'txt', 'pdf', 'doc', 'docx'}))
+                text = file_handler.extract_text(form.file.data)
+            elif form.text_input.data:
+                text = form.text_input.data.strip()
 
-        db.session.commit()
+            if text:  # 只有当有输入文本时才处理
+                # 使用DeepSeek API提取实体和关系
+                api = DeepSeekAPI()
+                extracted_data = api.extract_entities(text)
+                
+                current_app.logger.info(f"Extracted data: {extracted_data}")  # 添加日志
 
-        # 记录操作历史
-        history = GraphHistory(
-            graph_id=graph.id,
-            user_id=current_user.id,
-            operation='create',
-            details={'method': 'api_extraction'}
-        )
-        db.session.add(history)
-        db.session.commit()
+                # 创建实体字典用于跟踪ID映射
+                entity_id_map = {}
 
-        return jsonify({'success': True, 'graph_id': graph.id})
+                # 添加实体到数据库
+                for entity_data in extracted_data['entities']:
+                    entity = Entity(
+                        name=entity_data['name'],
+                        type=entity_data['type'],
+                        properties=entity_data.get('properties', {}),
+                        graph=graph
+                    )
+                    db.session.add(entity)
+                    db.session.flush()  # 获取自动生成的ID
+                    entity_id_map[entity_data['id']] = entity.id
+
+                db.session.commit()
+
+                # 添加关系到数据库
+                for relation_data in extracted_data['relations']:
+                    source_id = entity_id_map.get(relation_data['source_id'])
+                    target_id = entity_id_map.get(relation_data['target_id'])
+                    
+                    if source_id and target_id:
+                        relation = Relation(
+                            source_id=source_id,
+                            target_id=target_id,
+                            relation_type=relation_data['relation_type'],  # 修改这里：使用 relation_type
+                            properties=relation_data.get('properties', {}),
+                            confidence=relation_data.get('confidence', 1.0),
+                            graph=graph
+                        )
+                        db.session.add(relation)
+
+                db.session.commit()
+
+            return redirect(url_for('graph.view', graph_id=graph.id))
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error creating graph: {str(e)}")
+            return render_template('graph/create.html', form=form, error="创建图谱时发生错误，请重试。")
 
     return render_template('graph/create.html', form=form)
 
-@graph.route('/<int:graph_id>')
-@login_required
+@graph.route('/view/<int:graph_id>')
 def view(graph_id):
     """查看知识图谱"""
-    graph = KnowledgeGraph.query.get_or_404(graph_id)
-    return render_template('graph/view.html', graph=graph)
+    graph_data = KnowledgeGraph.query.get_or_404(graph_id)
+    
+    # 获取实体和关系
+    entities = Entity.query.filter_by(graph_id=graph_id).all()
+    relations = Relation.query.filter_by(graph_id=graph_id).all()
+    
+    # 准备可视化数据
+    nodes = []
+    edges = []
+    
+    # 添加节点
+    for entity in entities:
+        nodes.append({
+            'id': entity.id,
+            'label': entity.name,
+            'title': f'类型: {entity.type}<br>属性: {json.dumps(entity.properties, ensure_ascii=False)}',
+            'group': entity.type,  # 用于颜色分组
+            'properties': entity.properties
+        })
+    
+    # 添加边
+    for relation in relations:
+        edges.append({
+            'from': relation.source_id,
+            'to': relation.target_id,
+            'label': relation.relation_type,  
+            'title': f'置信度: {relation.confidence}<br>属性: {json.dumps(relation.properties, ensure_ascii=False)}',
+            'arrows': 'to',
+            'properties': relation.properties
+        })
+    
+    # 构建完整的图数据
+    visualization_data = {
+        'nodes': nodes,
+        'edges': edges
+    }
+    
+    return render_template('graph/view.html', 
+                         graph=graph_data,
+                         graph_data=json.dumps(visualization_data, ensure_ascii=False),
+                         entities=entities,
+                         relations=relations)
 
 @graph.route('/<int:graph_id>/edit', methods=['GET', 'POST'])
-@login_required
 def edit(graph_id):
     """编辑知识图谱"""
     graph = KnowledgeGraph.query.get_or_404(graph_id)
@@ -100,7 +159,6 @@ def edit(graph_id):
     return render_template('graph/edit.html', form=form, graph=graph)
 
 @graph.route('/<int:graph_id>/merge', methods=['POST'])
-@login_required
 def merge(graph_id):
     """合并两个知识图谱"""
     target_graph_id = request.json.get('target_graph_id')
@@ -151,7 +209,6 @@ def merge(graph_id):
     return jsonify({'success': True})
 
 @graph.route('/<int:graph_id>/visualize', methods=['GET'])
-@login_required
 def visualize(graph_id):
     """可视化知识图谱"""
     graph_data = KnowledgeGraph.query.get_or_404(graph_id)
@@ -162,7 +219,7 @@ def visualize(graph_id):
     include_probabilistic = request.args.get('probabilistic', 'false').lower() == 'true'
     
     # 创建输出目录
-    output_dir = os.path.join(current_app.static_folder, 'graphs', str(current_user.id))
+    output_dir = os.path.join(current_app.static_folder, 'graphs')
     os.makedirs(output_dir, exist_ok=True)
     
     # 准备实体和关系数据
@@ -188,11 +245,7 @@ def visualize(graph_id):
     
     # 选择可视化器
     if viz_type == 'domain':
-        visualizer = DomainSpecificVisualizer(
-            domain=graph_data.domain,
-            enable_temporal=include_temporal,
-            enable_probabilistic=include_probabilistic
-        )
+        visualizer = GraphVisualizer()
         
         # 设置领域特定样式
         visualizer.set_color_scheme({
@@ -216,10 +269,7 @@ def visualize(graph_id):
         )
     
     elif viz_type == 'temporal':
-        visualizer = DomainSpecificVisualizer(
-            enable_temporal=True,
-            enable_probabilistic=False
-        )
+        visualizer = GraphVisualizer()
         output_file = os.path.join(output_dir, f'graph_{graph_id}_temporal.html')
         temporal_relations = [r for r in relations 
                             if ('temporal' in r.source.properties or 
@@ -227,10 +277,7 @@ def visualize(graph_id):
         visualizer.visualize_temporal(temporal_relations, output_file)
     
     elif viz_type == 'probabilistic':
-        visualizer = DomainSpecificVisualizer(
-            enable_temporal=False,
-            enable_probabilistic=True
-        )
+        visualizer = GraphVisualizer()
         output_file = os.path.join(output_dir, f'graph_{graph_id}_probabilistic.html')
         uncertain_relations = [r for r in relations if r.confidence < 0.9]
         visualizer.visualize_probabilistic(uncertain_relations, output_file)
@@ -243,7 +290,6 @@ def visualize(graph_id):
     # 记录可视化历史
     history = GraphHistory(
         graph_id=graph_id,
-        user_id=current_user.id,
         operation='visualize',
         details={
             'type': viz_type,
@@ -264,7 +310,6 @@ def visualize(graph_id):
     })
 
 @graph.route('/<int:graph_id>/export', methods=['GET'])
-@login_required
 def export(graph_id):
     """导出知识图谱"""
     graph = KnowledgeGraph.query.get_or_404(graph_id)
@@ -275,7 +320,7 @@ def export(graph_id):
         return jsonify(data)
     
     elif format_type == 'csv':
-        output_dir = os.path.join(current_app.static_folder, 'exports', str(current_user.id))
+        output_dir = os.path.join(current_app.static_folder, 'exports')
         os.makedirs(output_dir, exist_ok=True)
         
         # 导出节点
@@ -330,7 +375,7 @@ def export(graph_id):
             g.add((source_uri, relation_uri, target_uri))
         
         # 导出RDF
-        output_dir = os.path.join(current_app.static_folder, 'exports', str(current_user.id))
+        output_dir = os.path.join(current_app.static_folder, 'exports')
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f'graph_{graph_id}.ttl')
         g.serialize(destination=output_file, format='turtle')
@@ -344,8 +389,23 @@ def export(graph_id):
     
     return jsonify({'error': 'Unsupported format'}), 400
 
+@graph.route('/<int:graph_id>/delete', methods=['POST'])
+def delete_graph(graph_id):
+    """删除知识图谱"""
+    graph = KnowledgeGraph.query.get_or_404(graph_id)
+    try:
+        # 删除相关的实体和关系
+        Entity.query.filter_by(graph_id=graph_id).delete()
+        Relation.query.filter_by(graph_id=graph_id).delete()
+        db.session.delete(graph)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error deleting graph: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @graph.route('/batch', methods=['POST'])
-@login_required
 def batch_process():
     """批量处理数据"""
     files = request.files.getlist('files')
@@ -376,7 +436,6 @@ def batch_process():
                 # 添加实体和关系
                 for entity_data in extracted_data['entities']:
                     entity = Entity(
-                        entity_id=entity_data['id'],
                         name=entity_data['name'],
                         type=entity_data['type'],
                         graph_id=graph.id

@@ -47,8 +47,8 @@ The system excels at:
 
 1. Clone repository
 ```bash
-git clone https://github.com/jsjm1986/knowledge-graph.git
-cd knowledge-graph
+git clone https://github.com/jsjm1986/prompt2graph.git
+cd prompt2graph
 ```
 
 2. Create virtual environment
@@ -169,8 +169,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 
 1. 克隆仓库
 ```bash
-git clone https://github.com/jsjm1986/knowledge-graph.git
-cd knowledge-graph
+git clone https://github.com/jsjm1986/prompt2graph.git
+cd prompt2graph
 ```
 
 2. 创建虚拟环境
